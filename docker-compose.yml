@@ -1,0 +1,33 @@
+version: "1"
+
+services:
+
+  database:
+    build:
+      context: ./nt-database
+    image: nt-database
+    # set default mysql root password, change as needed
+    environment:
+      MYSQL_ROOT_PASSWORD: notes
+    # Expose port 3306 to host. Not for the application but
+    # handy to inspect the database from the host machine.
+    ports:
+      - "3306:3306" 
+    restart: always
+
+  webserver:
+    build: 
+      context: ./tomcat-server
+    image: tomcat-server
+    # mount point for application in tomcat
+    volumes:
+      - C:\Users\14sur\Documents\GitHub\key\noteanalyzer\target\notes:/usr/local/tomcat/webapps/notes
+      - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
+      - C:\tomcatFile\notes:/notes
+    links:
+      - database:nt-database
+    # open ports for tomcat and remote debugging
+    ports:
+      - "8080:8080" 
+      - "8000:8000"
+    restart: always
