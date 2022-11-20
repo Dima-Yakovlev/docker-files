@@ -11,9 +11,14 @@ services:
       MYSQL_ROOT_PASSWORD: notes
     # Expose port 3306 to host. Not for the application but
     # handy to inspect the database from the host machine.
+    volumes:
+      # - type: bind
+        #source: C:\Users\14sur\Documents\work\mysql
+      - /opt/mysql_data:/var/lib/mysql
     ports:
       - "3306:3306" 
-    restart: always
+    restart: unless-stopped
+    container_name: nt-database
 
   webserver:
     build: 
@@ -21,13 +26,70 @@ services:
     image: tomcat-server
     # mount point for application in tomcat
     volumes:
-      - C:\Users\14sur\Documents\GitHub\key\noteanalyzer\target\notes:/usr/local/tomcat/webapps/notes
-      - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
-      - C:\tomcatFile\notes:/notes
+      - ./tomcat-server/tomcat/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml
+      - ./tomcat-server/tomcat/conf/context.xml:/tmp/context.xml
+      # - C:\Users\14sur\Documents\GitHub\key\noteanalyzer\target\notes:/usr/local/tomcat/webapps/notes
+      # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
+      # - C:\tomcatFile\notes:/notes
+      # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
+      - /opt/notes/uploadedFile:/opt/tomcat/uploadedFile
+      - /opt/notes/notes:/notes
+      - /opt/notes/unHandlerErrors:/opt/tomcat/unHandlerErrors
     links:
       - database:nt-database
     # open ports for tomcat and remote debugging
     ports:
       - "8080:8080" 
       - "8000:8000"
+    restart: always
+  
+  import-script:
+    build: 
+      context: ./python_scripts
+    image: import-script
+    volumes:
+      # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
+      # - C:\tomcatFile\notes:/notes
+      # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
+      - /opt/notes/uploadedFile:/opt/tomcat/uploadedFile
+      - /opt/notes/notes:/notes
+      - /opt/notes/unHandlerErrors:/opt/tomcat/unHandlerErrors
+    links:
+      - database:nt-database
+    ports:
+      - "5000:5000" 
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        # - C:\tomcatFile\rabbitmq\data\:/var/lib/rabbitmq/
+        # - C:\tomcatFile\rabbitmq\log\:/var/log/rabbitmq
+        - /opt/notes/rabbitmq/data/:/var/lib/rabbitmq/
+        - /opt/notes/rabbitmq/log/:/var/log/rabbitmq
+    restart: unless-stopped
+  
+  restntimport:
+    build: 
+      context: /media/surup/Windows/Users/14sur/Documents/GitHub/nt_import/api
+      target: debug
+    image: restntimport
+    environment:
+      - FLASK_DEBUG=1
+    entrypoint: [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "webapp",  "--wait-for-client", "--multiprocess", "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5002" ]
+    volumes:
+      # - C:\tomcatFile\uploadedFile:/app/uploadedFile
+      # - C:\Users\14sur\Documents\GitHub\nt_import\api:/work
+      - /opt/notes/uploadedFile:/app/uploadedFile
+      - /media/surup/Windows/Users/14sur/Documents/GitHub/nt_import/api:/work
+    links:
+      - database:nt-database
+      - rabbitmq:nt-rabbitmq
+    ports:
+      - 5002:5002
+      - 5678:5678
     restart: always
