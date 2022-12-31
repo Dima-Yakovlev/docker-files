@@ -31,4 +31,4 @@ RUN pip3 install -r requirements_app.txt
 RUN sed -i "s|localhost|nt-database|g" ./settings/database.py 
 
 CMD [ "python3", "app.py"]
-# ENTRYPOINT [ "python3", "-u", "/app/nt_import/nt_importd.py", "/app/nt_import/logs/run/nt_importd.pid","/app/nt_import/logs/nt_importd.log","start"]
+# CMD [ "python3", "-u", "/app/nt_import/nt_importd.py", "/app/nt_import/logs/run/nt_importd.pid","/app/nt_import/logs/nt_importd.log","start"]

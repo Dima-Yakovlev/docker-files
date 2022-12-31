@@ -14,7 +14,7 @@ services:
     volumes:
       # - type: bind
         #source: C:\Users\14sur\Documents\work\mysql
-      - /opt/mysql_data:/var/lib/mysql
+      - /home/surup/notes_data/mysql_data:/var/lib/mysql
     ports:
       - "3306:3306" 
     restart: unless-stopped
@@ -32,9 +32,9 @@ services:
       # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
       # - C:\tomcatFile\notes:/notes
       # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
-      - /opt/notes/uploadedFile:/opt/tomcat/uploadedFile
-      - /opt/notes/notes:/notes
-      - /opt/notes/unHandlerErrors:/opt/tomcat/unHandlerErrors
+      - /home/surup/notes_data/uploadedFile:/opt/tomcat/uploadedFile
+      - /home/surup/notes_data/notes:/notes
+      - /home/surup/notes_data/unHandlerErrors:/opt/tomcat/unHandlerErrors
     links:
       - database:nt-database
     # open ports for tomcat and remote debugging
@@ -51,9 +51,9 @@ services:
       # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
       # - C:\tomcatFile\notes:/notes
       # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
-      - /opt/notes/uploadedFile:/opt/tomcat/uploadedFile
-      - /opt/notes/notes:/notes
-      - /opt/notes/unHandlerErrors:/opt/tomcat/unHandlerErrors
+      - /home/surup/notes_data/uploadedFile:/opt/tomcat/uploadedFile
+      - /home/surup/notes_data/notes:/notes
+      - /home/surup/notes_data/unHandlerErrors:/opt/tomcat/unHandlerErrors
     links:
       - database:nt-database
     ports:
@@ -69,27 +69,28 @@ services:
     volumes:
         # - C:\tomcatFile\rabbitmq\data\:/var/lib/rabbitmq/
         # - C:\tomcatFile\rabbitmq\log\:/var/log/rabbitmq
-        - /opt/notes/rabbitmq/data/:/var/lib/rabbitmq/
-        - /opt/notes/rabbitmq/log/:/var/log/rabbitmq
+        - /home/surup/notes_data/rabbitmq/data/:/var/lib/rabbitmq/
+        - /home/surup/notes_data/rabbitmq/log/:/var/log/rabbitmq
+    command: ["bash", "-c", "chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
     restart: unless-stopped
   
   restntimport:
     build: 
-      context: /media/surup/Windows/Users/14sur/Documents/GitHub/nt_import/api
-      target: debug
+      context: /home/surup/github/nt_import/api
+      target: prod
     image: restntimport
-    environment:
-      - FLASK_DEBUG=1
-    entrypoint: [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "webapp",  "--wait-for-client", "--multiprocess", "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5002" ]
+    # environment:
+    #   - FLASK_DEBUG=1
+    # entrypoint: [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "webapp",  "--wait-for-client", "--multiprocess", "-m", "flask", "run", "-h", "0.0.0", "-p", "5002" ]
     volumes:
       # - C:\tomcatFile\uploadedFile:/app/uploadedFile
       # - C:\Users\14sur\Documents\GitHub\nt_import\api:/work
-      - /opt/notes/uploadedFile:/app/uploadedFile
-      - /media/surup/Windows/Users/14sur/Documents/GitHub/nt_import/api:/work
+      - /home/surup/notes_data/uploadedFile:/app/uploadedFile
+      - /home/surup/github/nt_import/api:/work
     links:
       - database:nt-database
       - rabbitmq:nt-rabbitmq
     ports:
       - 5002:5002
-      - 5678:5678
-    restart: always
+      # - 5678:5678
+    restart: unless-stopped

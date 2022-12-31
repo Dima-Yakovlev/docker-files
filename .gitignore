@@ -1,2 +1,3 @@
 
 nt-database/docker-entrypoint-initdb.d/nt_dump.sql
+venv
