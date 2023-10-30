@@ -14,7 +14,7 @@ services:
     volumes:
       # - type: bind
         #source: C:\Users\14sur\Documents\work\mysql
-      - /home/surup/notes_data/mysql_data:/var/lib/mysql
+      - /home/surup/notes_data/mysql:/var/lib/mysql
     ports:
       - "3306:3306" 
     restart: unless-stopped
@@ -45,19 +45,14 @@ services:
   
   import-script:
     build: 
-      context: ./python_scripts
+      context: /home/surup/github/old_import/nt_import
     image: import-script
     volumes:
       # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
       # - C:\tomcatFile\notes:/notes
       # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
-      - /home/surup/notes_data/uploadedFile:/opt/tomcat/uploadedFile
-      - /home/surup/notes_data/notes:/notes
-      - /home/surup/notes_data/unHandlerErrors:/opt/tomcat/unHandlerErrors
-    links:
-      - database:nt-database
-    ports:
-      - "5000:5000" 
+      - /home/surup/notes_data:/opt/tomcat
+      - /home/surup/notes_data/notes:/notes 
     restart: unless-stopped
 
   rabbitmq:
@@ -94,3 +89,22 @@ services:
       - 5002:5002
       # - 5678:5678
     restart: unless-stopped
+
+  flaskapi:
+    build: 
+        context: /home/surup/github/api
+    image: flaskapi
+    volumes:
+      - /home/surup/github/api:/app
+    ports:
+      - 5001:5000
+    restart: unless-stopped
+
+  vue-js:
+    build: 
+        context: /home/surup/github/VueJs
+    image: vue-js
+    ports:
+      - 8081:80
+    restart: unless-stopped
+
