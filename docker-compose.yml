@@ -28,13 +28,9 @@ services:
     volumes:
       - ./tomcat-server/tomcat/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml
       - ./tomcat-server/tomcat/conf/context.xml:/tmp/context.xml
-      # - C:\Users\14sur\Documents\GitHub\key\noteanalyzer\target\notes:/usr/local/tomcat/webapps/notes
-      # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
-      # - C:\tomcatFile\notes:/notes
-      # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
-      - /home/surup/notes_data/uploadedFile:/opt/tomcat/uploadedFile
-      - /home/surup/notes_data/notes:/notes
-      - /home/surup/notes_data/unHandlerErrors:/opt/tomcat/unHandlerErrors
+      - /opt/tomcat/uploadedFile:/opt/tomcat/uploadedFile
+      - /notes:/notes
+      - /opt/tomcat/unHandlerErrors:/opt/tomcat/unHandlerErrors
     links:
       - database:nt-database
     # open ports for tomcat and remote debugging
@@ -45,14 +41,14 @@ services:
   
   import-script:
     build: 
-      context: /home/surup/github/old_import/nt_import
+      context: /home/notes/bin/nt_import
     image: import-script
     volumes:
       # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
       # - C:\tomcatFile\notes:/notes
       # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
-      - /home/surup/notes_data:/opt/tomcat
-      - /home/surup/notes_data/notes:/notes 
+      - /opt/tomcat:/opt/tomcat
+      - /notes:/notes 
     restart: unless-stopped
 
   rabbitmq:
