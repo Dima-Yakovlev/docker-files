@@ -16,9 +16,11 @@ services:
         #source: C:\Users\14sur\Documents\work\mysql
       - /home/surup/notes_data/mysql:/var/lib/mysql
     ports:
-      - "3306:3306" 
+      - "127.0.0.1:3306:3306" 
     restart: unless-stopped
     container_name: nt-database
+    networks: 
+      - my-network
 
   webserver:
     build: 
@@ -28,27 +30,32 @@ services:
     volumes:
       - ./tomcat-server/tomcat/tomcat-users.xml:/usr/local/tomcat/conf/tomcat-users.xml
       - ./tomcat-server/tomcat/conf/context.xml:/tmp/context.xml
-      - /opt/tomcat/uploadedFile:/opt/tomcat/uploadedFile
-      - /notes:/notes
-      - /opt/tomcat/unHandlerErrors:/opt/tomcat/unHandlerErrors
-    links:
-      - database:nt-database
-    # open ports for tomcat and remote debugging
+      # - C:\Users\14sur\Documents\GitHub\key\noteanalyzer\target\notes:/usr/local/tomcat/webapps/notes
+      # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
+      # - C:\tomcatFile\notes:/notes
+      # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
+      - /home/surup/notes_data/uploadedFile:/opt/tomcat/uploadedFile
+      - /home/surup/notes_data/notes:/notes
+      - /home/surup/notes_data/unHandlerErrors:/opt/tomcat/unHandlerErrors
     ports:
       - "8080:8080" 
       - "8000:8000"
     restart: always
+    networks: 
+      - my-network
   
   import-script:
     build: 
-      context: /home/notes/bin/nt_import
+      context: /home/surup/github/old_import/nt_import
     image: import-script
     volumes:
       # - C:\tomcatFile\uploadedFile:/opt/tomcat/uploadedFile
       # - C:\tomcatFile\notes:/notes
       # - C:\tomcatFile\unHandlerErrors:/opt/tomcat/unHandlerErrors
-      - /opt/tomcat:/opt/tomcat
-      - /notes:/notes 
+      - /home/surup/notes_data:/opt/tomcat
+      - /home/surup/notes_data/notes:/notes 
+      - /home/surup/github/old_import/nt_import/nt:/app/nt_import/nt
+      - /home/surup/github/old_import/nt_import/lib:/app/nt_import/lib
     restart: unless-stopped
 
   rabbitmq:
@@ -64,6 +71,8 @@ services:
         - /home/surup/notes_data/rabbitmq/log/:/var/log/rabbitmq
     command: ["bash", "-c", "chmod 400 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
     restart: unless-stopped
+    networks: 
+      - my-network
   
   restntimport:
     build: 
@@ -98,9 +107,15 @@ services:
 
   vue-js:
     build: 
-        context: /home/surup/github/VueJs
+      context: /home/surup/github/VueJs
     image: vue-js
     ports:
       - 8081:80
     restart: unless-stopped
+    networks: 
+      - my-network
 
+networks:
+  my-network:
+    external: false
+    name: specific-network-name

@@ -1,6 +1,4 @@
 FROM mysql:5.7
-
-RUN yum install -y vim
 # Copy the database initialize script: 
 # Contents of /docker-entrypoint-initdb.d are run on mysqld startup
 # ADD  docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
